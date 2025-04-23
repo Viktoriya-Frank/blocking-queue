@@ -13,30 +13,26 @@ public class BlkQueueImpl<T> implements BlkQueue<T> {
     }
 
     @Override
-    public void push(T message) {
-        synchronized (this) {
+    public synchronized void push(T message) {
             while (queue.size() >= maxSize) {
                 try {
                     wait();
                 } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    return;
+                    throw new RuntimeException(e);
                 }
             }
             queue.add(message);
-            notifyAll();
-        }
+            notify();
+
     }
 
     @Override
-    public T pop() {
-        synchronized (this) {
+    public synchronized T pop() {
             while (queue.isEmpty()) {
                 try {
                     wait();
                 } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    return null;
+                    throw new RuntimeException(e);
                 }
             }
             T result = queue.poll();
@@ -44,4 +40,3 @@ public class BlkQueueImpl<T> implements BlkQueue<T> {
             return result;
         }
     }
-}
